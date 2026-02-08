@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, viewport-fit=cover, initial-scale=1, maximum-scale=1" />
+  <meta name="theme-color" content="#070A12" />
+
+  <title>Logbook Pro</title>
+  <meta name="description" content="Logbook palestra premium: carichi, serie, recuperi, timer, PR, volume e storico. Offline e ottimizzato iOS." />
+
+  <!-- PWA -->
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="icon" href="./assets/icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="./assets/apple-touch-icon.png" />
+
+  <!-- iOS A2HS -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Logbook Pro" />
+
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+
+<body>
+  <div class="bg-orbs" aria-hidden="true"></div>
+
+  <header class="top">
+    <div class="brand">
+      <img class="brand-ic" src="./assets/icon.svg" alt="" />
+      <div class="brand-txt">
+        <div class="brand-name">Logbook Pro</div>
+        <div class="brand-sub" id="brandSub">Oggi</div>
+      </div>
+    </div>
+
+    <button class="icon-btn" id="btnMenu" aria-label="Menu">
+      <span class="ic">☰</span>
+    </button>
+  </header>
+
+  <main class="main">
+    <!-- ALERT PER AUDIO (iOS richiede gesto utente) -->
+    <section class="card alert" id="audioBanner">
+      <div class="alert-left">
+        <div class="alert-title">Avvisi pronti in 1 tap</div>
+        <div class="alert-sub">Su iOS serve un tocco per abilitare suoni forti. Poi non ci pensi più.</div>
+      </div>
+      <button class="btn primary" id="btnEnableAlerts">Abilita</button>
+    </section>
+
+    <!-- VIEW: SESSION -->
+    <section class="view" id="view-session">
+      <section class="hero">
+        <div class="hero-row">
+          <div class="hero-a">
+            <div class="k">Sessione</div>
+            <div class="v" id="sessState">Pronto</div>
+            <div class="s" id="sessMeta">Premi Inizia e aggiungi esercizi.</div>
+          </div>
+          <div class="hero-b">
+            <button class="btn primary" id="btnStart">Inizia</button>
+          </div>
+        </div>
+
+        <div class="hero-grid">
+          <div class="tile">
+            <div class="k">Elapsed</div>
+            <div class="v mono" id="elapsed">00:00</div>
+            <div class="s" id="timeSpan">—</div>
+          </div>
+          <div class="tile">
+            <div class="k">Recupero</div>
+            <div class="rest">
+              <div class="ring" id="ring" style="--p:0">
+                <div class="ring-in">
+                  <div class="mono ring-t" id="restLeft">—</div>
+                  <div class="ring-s" id="restLabel">Nessun timer</div>
+                </div>
+              </div>
+              <button class="btn ghost" id="btnStopRest" disabled>Stop</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="row between">
+        <h2 class="h2">Esercizi</h2>
+        <div class="row gap">
+          <button class="btn ghost" id="btnSummary">Riepilogo</button>
+          <button class="btn" id="btnAdd">+ Aggiungi</button>
+        </div>
+      </section>
+
+      <section id="sessionList" class="stack"></section>
+
+      <section class="card subtle">
+        <div class="row between">
+          <div>
+            <div class="k">Settimana</div>
+            <div class="v" id="weekKpi">0 / 4</div>
+            <div class="s" id="weekHint">Consiglio: max 4 allenamenti ogni 7 giorni.</div>
+          </div>
+          <button class="btn primary" id="btnSave" disabled>Salva sessione</button>
+        </div>
+      </section>
+    </section>
+
+    <!-- VIEW: LIBRERIA -->
+    <section class="view hidden" id="view-library">
+      <section class="row between">
+        <h2 class="h2">Libreria</h2>
+        <button class="btn" id="btnNewLib">+ Nuovo</button>
+      </section>
+
+      <section class="card">
+        <div class="row gap">
+          <input class="input" id="libSearch" placeholder="Cerca esercizio…" />
+          <select class="select" id="libType"></select>
+        </div>
+        <div class="s">Crea qui gli esercizi. Poi li aggiungi alla sessione in 1 tap.</div>
+      </section>
+
+      <section id="libList" class="stack"></section>
+    </section>
+
+    <!-- VIEW: STORICO -->
+    <section class="view hidden" id="view-history">
+      <section class="row between">
+        <h2 class="h2">Storico</h2>
+        <div class="row gap">
+          <button class="btn" id="btnExport">Export</button>
+          <label class="btn">
+            Import
+            <input type="file" id="fileImport" accept="application/json" hidden />
+          </label>
+        </div>
+      </section>
+
+      <section id="histList" class="stack"></section>
+    </section>
+
+    <!-- VIEW: IMPOSTAZIONI -->
+    <section class="view hidden" id="view-settings">
+      <h2 class="h2">Impostazioni</h2>
+
+      <section class="card">
+        <div class="row between">
+          <div>
+            <div class="k">Suoneria</div>
+            <div class="s">Scegli un pattern più evidente del “bip”.</div>
+          </div>
+          <select class="select" id="soundPreset"></select>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="row between">
+          <div>
+            <div class="k">Volume avviso</div>
+            <div class="s">Più alto = più udibile. (Limiti iOS dipendono dal volume di sistema.)</div>
+          </div>
+          <input class="range" id="soundVol" type="range" min="10" max="100" step="1" />
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="row between">
+          <div>
+            <div class="k">Ripetizioni</div>
+            <div class="s">Quante volte ripetere l’avviso a fine recupero.</div>
+          </div>
+          <input class="range" id="soundRepeat" type="range" min="1" max="5" step="1" />
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="row between">
+          <div>
+            <div class="k">Vibrazione (iPhone)</div>
+            <div class="s">La web app può vibrare l’iPhone se supportato.</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="toggleVibrate" />
+            <span></span>
+          </label>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="row between">
+          <div>
+            <div class="k">Animazione “fine recupero”</div>
+            <div class="s">Flash visivo + badge.</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="toggleFlash" />
+            <span></span>
+          </label>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="row gap">
+          <button class="btn" id="btnTestAlert">Test avviso</button>
+          <button class="btn danger" id="btnWipe">Reset dati</button>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="card subtle">
+          <div class="k">Apple Watch</div>
+          <div class="s">
+            Nota: da una web app non è possibile inviare “haptic” direttamente all’Apple Watch.
+            Puoi però usare vibrazione iPhone + suoneria forte. Per haptic Watch serve un’app Watch dedicata.
+          </div>
+        </div>
+      </section>
+    </section>
+
+  </main>
+
+  <!-- TABBAR -->
+  <nav class="tabs">
+    <button class="tab active" data-nav="session"><span class="ic">🏋️</span><span>Oggi</span></button>
+    <button class="tab" data-nav="library"><span class="ic">📚</span><span>Libreria</span></button>
+    <button class="tab" data-nav="history"><span class="ic">🗓️</span><span>Storico</span></button>
+    <button class="tab" data-nav="settings"><span class="ic">⚙️</span><span>Impost.</span></button>
+  </nav>
+
+  <!-- FAB -->
+  <button class="fab" id="fabAdd" aria-label="Aggiungi esercizio">＋</button>
+
+  <!-- MODAL / BOTTOM SHEET -->
+  <div class="modal hidden" id="modal">
+    <div class="sheet" role="dialog" aria-modal="true">
+      <div class="sheet-head">
+        <div>
+          <div class="sheet-title" id="mTitle">Titolo</div>
+          <div class="sheet-sub" id="mSub">Sottotitolo</div>
+        </div>
+        <button class="icon-btn" id="mClose" aria-label="Chiudi"><span class="ic">✕</span></button>
+      </div>
+      <div class="sheet-body" id="mBody"></div>
+      <div class="sheet-actions" id="mActions"></div>
+    </div>
+  </div>
+
+  <div class="toast hidden" id="toast"></div>
+
+  <script src="./storage.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
