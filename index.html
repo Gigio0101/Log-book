@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, viewport-fit=cover, initial-scale=1, maximum-scale=1" />
+  <meta name="theme-color" content="#0b0f19" />
+
+  <title>Logbook</title>
+  <meta name="description" content="Logbook palestra: carichi, serie, recuperi, timer e storico. Offline e ottimizzato iOS." />
+
+  <!-- PWA -->
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="icon" href="./assets/icon.svg" type="image/svg+xml" />
+
+  <!-- iOS “Add to Home Screen” -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Logbook" />
+
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+
+<body>
+  <div class="app" id="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">
+          <img src="./assets/icon.svg" alt="" />
+        </div>
+        <div>
+          <div class="brand-title">Logbook</div>
+          <div class="brand-sub" id="subTitle">Allenamento</div>
+        </div>
+      </div>
+
+      <button class="icon-btn" id="btnQuick" title="Azioni rapide" aria-label="Azioni rapide">
+        <span class="icon">⋯</span>
+      </button>
+    </header>
+
+    <main class="main">
+      <!-- VIEW: SESSIONE -->
+      <section class="view" id="view-session" data-view="session">
+        <div class="card hero">
+          <div class="hero-row">
+            <div class="hero-left">
+              <div class="label">Sessione</div>
+              <div class="value" id="sessionStatus">Non iniziata</div>
+              <div class="meta" id="sessionMeta">Premi “Inizia” per registrare l’orario.</div>
+            </div>
+            <div class="hero-right">
+              <button class="btn primary" id="btnStartStop">Inizia</button>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="grid2">
+            <div>
+              <div class="label">Timer recupero</div>
+              <div class="timer" id="restTimer">—</div>
+              <div class="meta" id="restHint">Avvia un recupero da una serie.</div>
+            </div>
+            <div class="right">
+              <button class="btn" id="btnSound">Abilita suono</button>
+              <button class="btn danger" id="btnResetRest" disabled>Stop timer</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="row between">
+          <h2 class="h2">Esercizi di oggi</h2>
+          <button class="btn" id="btnAddExercise">+ Aggiungi</button>
+        </div>
+
+        <div id="todayExercises" class="stack"></div>
+
+        <div class="card subtle">
+          <div class="row between">
+            <div>
+              <div class="label">Settimana</div>
+              <div class="value" id="weeklyCount">0 / 4</div>
+              <div class="meta" id="weeklyHint">Avviso se superi 4 allenamenti negli ultimi 7 giorni.</div>
+            </div>
+            <button class="btn ghost" id="btnFinish" disabled>Concludi & Salva</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW: ESERCIZI -->
+      <section class="view hidden" id="view-exercises" data-view="exercises">
+        <div class="row between">
+          <h2 class="h2">Libreria esercizi</h2>
+          <button class="btn" id="btnNewLibraryExercise">+ Nuovo</button>
+        </div>
+
+        <div class="card">
+          <div class="row gap">
+            <input class="input" id="libSearch" placeholder="Cerca (nome o tipo)…" />
+            <select class="select" id="libTypeFilter">
+              <option value="">Tutti i tipi</option>
+            </select>
+          </div>
+          <div class="meta">Qui crei gli esercizi una volta sola e poi li aggiungi alla sessione.</div>
+        </div>
+
+        <div id="libraryList" class="stack"></div>
+      </section>
+
+      <!-- VIEW: STORICO -->
+      <section class="view hidden" id="view-history" data-view="history">
+        <div class="row between">
+          <h2 class="h2">Storico</h2>
+          <div class="row gap">
+            <button class="btn" id="btnExport">Export</button>
+            <label class="btn">
+              Import
+              <input type="file" id="fileImport" accept="application/json" hidden />
+            </label>
+          </div>
+        </div>
+
+        <div id="historyList" class="stack"></div>
+      </section>
+
+      <!-- VIEW: IMPOSTAZIONI -->
+      <section class="view hidden" id="view-settings" data-view="settings">
+        <h2 class="h2">Impostazioni</h2>
+
+        <div class="card">
+          <div class="row between">
+            <div>
+              <div class="label">Vibrazione (se disponibile)</div>
+              <div class="meta">Su iOS può essere limitata.</div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="toggleVibrate" />
+              <span></span>
+            </label>
+          </div>
+          <div class="divider"></div>
+          <div class="row between">
+            <div>
+              <div class="label">Segnale fine recupero</div>
+              <div class="meta">Beep breve + badge “Recupero finito”.</div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="toggleBeep" />
+              <span></span>
+            </label>
+          </div>
+          <div class="divider"></div>
+          <div class="row between">
+            <div>
+              <div class="label">Reset dati locali</div>
+              <div class="meta">Cancella libreria, sessioni e impostazioni.</div>
+            </div>
+            <button class="btn danger" id="btnWipe">Reset</button>
+          </div>
+        </div>
+
+        <div class="card subtle">
+          <div class="label">Suggerimento iOS</div>
+          <div class="meta">
+            Apri da Safari → Condividi → “Aggiungi alla schermata Home” per avere la versione app a tutto schermo.
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <nav class="tabbar">
+      <button class="tab active" data-nav="session">
+        <span class="tab-ic">🏋️</span><span class="tab-tx">Oggi</span>
+      </button>
+      <button class="tab" data-nav="exercises">
+        <span class="tab-ic">📚</span><span class="tab-tx">Esercizi</span>
+      </button>
+      <button class="tab" data-nav="history">
+        <span class="tab-ic">🗓️</span><span class="tab-tx">Storico</span>
+      </button>
+      <button class="tab" data-nav="settings">
+        <span class="tab-ic">⚙️</span><span class="tab-tx">Impost.</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- MODAL -->
+  <div class="modal hidden" id="modal">
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="sheet-head">
+        <div>
+          <div class="sheet-title" id="modalTitle">Titolo</div>
+          <div class="sheet-sub" id="modalSub">Sottotitolo</div>
+        </div>
+        <button class="icon-btn" id="modalClose" aria-label="Chiudi"><span class="icon">✕</span></button>
+      </div>
+      <div class="sheet-body" id="modalBody"></div>
+      <div class="sheet-actions" id="modalActions"></div>
+    </div>
+  </div>
+
+  <div class="toast hidden" id="toast"></div>
+
+  <script src="./storage.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
